@@ -1,7 +1,9 @@
-const { Task } = require('../models/mongoose');
+const { Task, Board } = require('../models/mongoose');
 
 const create = async (document) => {
-    return await new Task(document).save();
+    const task = await new Task(document).save();
+    await Board.findByIdAndUpdate(task.board, { $push: { tasks: task.id } });
+    return task;
 };
 
 const read = async (id) => {
@@ -9,7 +11,7 @@ const read = async (id) => {
 }
 
 const readAll = async () => {
-    return await Task.find().exec();
+    return await Task.find().populate('board').exec();
 }
 
 const update = async (id, fields) => {
@@ -20,11 +22,16 @@ const update = async (id, fields) => {
     };
     document.set(newDocument);
     await document.save();
-    return document;
-};
+    return document; 
+}
 
 const remove = async (id) => {
     const response = await Task.findByIdAndDelete(id).exec();
+    return response !== null;
+}
+
+const clearCompleted = async () => {
+    const response = await Task.deleteMany({completed: true});
     return response !== null;
 }
 
@@ -33,6 +40,7 @@ module.exports = {
     read,
     readAll,
     update,
-    remove
+    remove,
+    clearCompleted,
 }
 

@@ -1,36 +1,52 @@
 const { Router } = require('express');
+const { validateTask } = require('../models/mongoose');
 const TaskService = require('../services/TaskService');
+
+const validate = require("../middlewares/validate")
 
 const router = Router();
 
 
-router.get("", (req, res) => {
-    res.status(200).json({message: 'Its alive'});
+router.get("", async (req, res) => {
+    const tasks = await TaskService.readAll();
+    return res.status(200).json(tasks);
 });
 
-router.get("/:id", (req, res) => {
-    
+router.get("/:id", async (req, res) => {
+    const task = await TaskService.read(req.params.id);
+    return res.status(200).json(task);
 });
 
-router.post("", async (req, res) => {
+router.post("", validate(validateTask), async (req, res) => {
     const body  = req.body;
-    // console.log(req);
-    console.log(body)
     const task = await TaskService.create(body);
-    return res.status(204).json(task.toObject())
+    return res.status(201).json(task)
 });
 
-router.put("/:id", (req, res) => {
-    
+router.put("/:id", validate(validateTask), async (req, res) => {
+    const body  = req.body;
+    const { id } = req.params
+    const task = await TaskService.update(id, body);
+    return res.status(200).json(task)
 });
 
-router.patch("/:id", (req, res) => {
-    
+router.patch("/:id", validate(validateTask), async (req, res) => {
+    const body  = req.body;
+    const { id } = req.params
+    const task = await TaskService.update(id, body);
+    return res.status(200).json(task)
 });
 
-router.delete("/:id", (req, res) => {
-    
+router.delete("/:id", async (req, res) => {
+    const { id } = req.params
+    const deleted = await TaskService.remove(id);
+    return res.status(200).json(deleted)
 });
+
+router.post('/clear', async (req, res) => {
+    const deleted = await TaskService.clearCompleted();
+    return res.status(200).json(deleted)
+})
 
 
 module.exports = router;
