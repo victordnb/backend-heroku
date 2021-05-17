@@ -1,11 +1,12 @@
 const { Router } = require('express');
 const { validateTask } = require('../models/mongoose');
 const TaskService = require('../services/TaskService');
-
 const validate = require("../middlewares/validate")
+const protect = require('../middlewares/protect');
 
 const router = Router();
 
+router.use(protect);
 
 router.get("", async (req, res) => {
     const tasks = await TaskService.readAll();

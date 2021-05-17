@@ -7,6 +7,7 @@ const port = 8000;
 
 const TaskRouter = require('./controllers/TaskRouter');
 const BoardRouter = require('./controllers/BoardRouter');
+const AuthRouter = require('./controllers/AuthRouter');
 
 app.use(cors({
     origin: '*',
@@ -14,7 +15,7 @@ app.use(cors({
 }));
 
 app.use(express.json())
-
+app.use(AuthRouter);
 app.use('/task', TaskRouter);
 app.use('/board', BoardRouter);
 

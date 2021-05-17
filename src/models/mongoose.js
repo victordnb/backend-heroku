@@ -2,7 +2,7 @@ require('dotenv').config();
 const Ajv = require('ajv');
 const ajv = new Ajv();
 const mongoose = require('mongoose');
-
+const { encryptPassword } = require('../helpers/password');
 
 mongoose.connect(`mongodb+srv://Nucliostudent:tc13ybK3goJTQMpm@mongotraining.lk4fc.mongodb.net/tasker?retryWrites=true&w=majority`, {useNewUrlParser: true, useUnifiedTopology: true});
 
@@ -23,9 +23,36 @@ const Board = mongoose.model('Board', {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Task'
     }],
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+    },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
 });
+
+const userSchema = new mongoose.Schema({
+    email: String,
+    password: String,
+    boards: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Board'
+        }
+    ],
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
+});
+
+userSchema.pre('save', async function (next) {
+    const user = this;
+    if (user.isModified("password")) {
+        user.password = await encryptPassword(user.password); // encrypt;
+    }
+    next();
+});
+
+const User = mongoose.model('User', userSchema);
 
 const taskCreateSchema = {
     type: "object",
@@ -88,6 +115,7 @@ validateBoard = (document) => {
 module.exports = {
     Task,
     Board,
+    User,
     validateTask,
     validateBoard,
 }
