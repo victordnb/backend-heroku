@@ -20,3 +20,6 @@ app.use('/task', TaskRouter);
 app.use('/board', BoardRouter);
 
 app.listen(port, () => console.log(`Listening on http://localhost:${port}`));
+
+//prueba
+console.log('hey welcome');
